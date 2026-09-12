@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — QR Shield{% endblock %}
+
+{% block content %}
+<section style="padding-top:120px;padding-bottom:80px;position:relative;z-index:1;">
+    <div class="container">
+        <div class="section-header" style="margin-bottom:48px;">
+            <div class="section-label">Analytics</div>
+            <h2 class="section-title">System <span class="highlight">Dashboard</span></h2>
+            <p class="section-subtitle">Overview of QR code scan activity and fraud detection statistics.</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-container" style="margin-bottom:48px;">
+            <div class="stat-card">
+                <div class="stat-icon">🔍</div>
+                <div class="stat-number" style="font-size:2.2rem;">{{ stats.total_scans }}</div>
+                <div class="stat-label">Total Scans</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-number"
+                    style="font-size:2.2rem;background:linear-gradient(135deg,#06d6a0,#38efa7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+                    {{ stats.safe_scans }}</div>
+                <div class="stat-label">Safe</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-number"
+                    style="font-size:2.2rem;background:linear-gradient(135deg,#ffd166,#f78c6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+                    {{ stats.suspicious_detected }}</div>
+                <div class="stat-label">Suspicious</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🚨</div>
+                <div class="stat-number"
+                    style="font-size:2.2rem;background:linear-gradient(135deg,#ef476f,#f78c6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+                    {{ stats.scams_detected }}</div>
+                <div class="stat-label">Scams Detected</div>
+            </div>
+        </div>
+
+        <!-- Database Stats -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:48px;">
+            <div class="stat-card" style="display:flex;align-items:center;gap:20px;text-align:left;padding:28px 32px;">
+                <div
+                    style="width:56px;height:56px;border-radius:12px;background:rgba(239,71,111,0.1);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">
+                    🚫</div>
+                <div>
+                    <div style="font-size:1.6rem;font-weight:800;color:var(--accent-red);">{{ stats.blacklisted_count }}
+                    </div>
+                    <div class="stat-label">Blacklisted Patterns</div>
+                    <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">Known scam UPI IDs & domains
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card" style="display:flex;align-items:center;gap:20px;text-align:left;padding:28px 32px;">
+                <div
+                    style="width:56px;height:56px;border-radius:12px;background:rgba(6,214,160,0.1);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">
+                    ✅</div>
+                <div>
+                    <div style="font-size:1.6rem;font-weight:800;color:var(--accent-cyan);">{{ stats.whitelisted_count
+                        }}</div>
+                    <div class="stat-label">Whitelisted Patterns</div>
+                    <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">Verified trusted entities
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Scans -->
+        <div
+            style="background:var(--bg-glass);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);overflow:hidden;">
+            <div
+                style="padding:20px 24px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;">
+                <h3 style="font-size:1.1rem;font-weight:700;">Recent Scans</h3>
+                <a href="{{ url_for('history') }}" style="font-size:0.85rem;font-weight:500;">View All →</a>
+            </div>
+            {% if recent_scans %}
+            <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:rgba(255,255,255,0.02);">
+                            <th
+                                style="padding:12px 16px;text-align:left;font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">
+                                ID</th>
+                            <th
+                                style="padding:12px 16px;text-align:left;font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">
+                                Date</th>
+                            <th
+                                style="padding:12px 16px;text-align:left;font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">
+                                Type</th>
+                            <th
+                                style="padding:12px 16px;text-align:left;font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">
+                                QR Data</th>
+                            <th
+                                style="padding:12px 16px;text-align:left;font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">
+                                Score</th>
+                            <th
+                                style="padding:12px 16px;text-align:left;font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">
+                                Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for scan in recent_scans %}
+                        <tr style="border-bottom:1px solid var(--border-subtle);transition:background 0.2s;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.02)'"
+                            onmouseout="this.style.background=''">
+                            <td
+                                style="padding:14px 16px;font-size:0.85rem;font-family:var(--font-mono);color:var(--text-muted);">
+                                #{{ scan.id }}</td>
+                            <td style="padding:14px 16px;font-size:0.85rem;color:var(--text-secondary);">{{
+                                scan.scan_date.strftime('%b %d, %H:%M') }}</td>
+                            <td style="padding:14px 16px;">
+                                <span
+                                    style="padding:3px 10px;border-radius:100px;font-size:0.75rem;font-weight:600;background:rgba(17,138,178,0.1);color:var(--accent-blue);text-transform:uppercase;">{{
+                                    scan.data_type }}</span>
+                            </td>
+                            <td
+                                style="padding:14px 16px;font-size:0.82rem;font-family:var(--font-mono);color:var(--text-secondary);max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                {{ scan.qr_data[:60] }}{% if scan.qr_data|length > 60 %}...{% endif %}</td>
+                            <td style="padding:14px 16px;font-size:0.88rem;font-weight:700;
+                                {% if scan.risk_level == 'safe' %}color:var(--accent-cyan);
+                                {% elif scan.risk_level == 'suspicious' %}color:var(--accent-yellow);
+                                {% else %}color:var(--accent-red);{% endif %}
+                            ">{{ scan.fraud_score }}</td>
+                            <td style="padding:14px 16px;">
+                                {% if scan.risk_level == 'safe' %}
+                                <span
+                                    style="padding:4px 12px;border-radius:100px;font-size:0.75rem;font-weight:600;background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.2);color:var(--accent-cyan);">Safe</span>
+                                {% elif scan.risk_level == 'suspicious' %}
+                                <span
+                                    style="padding:4px 12px;border-radius:100px;font-size:0.75rem;font-weight:600;background:rgba(255,209,102,0.1);border:1px solid rgba(255,209,102,0.2);color:var(--accent-yellow);">Suspicious</span>
+                                {% else %}
+                                <span
+                                    style="padding:4px 12px;border-radius:100px;font-size:0.75rem;font-weight:600;background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.2);color:var(--accent-red);">Scam</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="padding:60px 24px;text-align:center;">
+                <p style="font-size:2rem;margin-bottom:12px;">🔍</p>
+                <p style="color:var(--text-secondary);">No scans yet. <a href="{{ url_for('scanner') }}">Scan your first
+                        QR code</a> to get started.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

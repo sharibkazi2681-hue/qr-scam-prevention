@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+{% block title %}QR Shield — QR Code Scam Prevention System{% endblock %}
+
+{% block content %}
+<!-- ============ HERO ============ -->
+<section class="hero" id="hero">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                Rule-Based Fraud Detection System
+            </div>
+            <h1 class="hero-title">
+                Stop QR Code<br>
+                <span class="gradient-text">Scams Before They Strike</span>
+            </h1>
+            <p class="hero-desc">
+                Protect yourself from fraudulent QR codes. Our intelligent rule-based detection system analyzes UPI
+                payment links and URLs to identify scams in real-time.
+            </p>
+            <div class="hero-actions">
+                <a href="{{ url_for('scanner') }}" class="btn btn-primary">
+                    🔍 Scan QR Code
+                </a>
+                <a href="#how-it-works" class="btn btn-outline">
+                    Learn How It Works →
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <h3 id="heroTotalScans">{{ stats.total_scans }}</h3>
+                    <p>QR Codes Scanned</p>
+                </div>
+                <div class="hero-stat">
+                    <h3 id="heroScamsDetected">{{ stats.scams_detected }}</h3>
+                    <p>Scams Detected</p>
+                </div>
+                <div class="hero-stat">
+                    <h3>20+</h3>
+                    <p>Detection Rules</p>
+                </div>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="qr-shield">
+                <div class="qr-shield-ring"></div>
+                <div class="qr-shield-ring"></div>
+                <div class="qr-shield-ring"></div>
+                <div class="qr-shield-center">
+                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- QR Pattern -->
+                        <rect x="10" y="10" width="30" height="30" rx="4" stroke="#06d6a0" stroke-width="2.5"
+                            fill="rgba(6,214,160,0.05)" />
+                        <rect x="80" y="10" width="30" height="30" rx="4" stroke="#06d6a0" stroke-width="2.5"
+                            fill="rgba(6,214,160,0.05)" />
+                        <rect x="10" y="80" width="30" height="30" rx="4" stroke="#06d6a0" stroke-width="2.5"
+                            fill="rgba(6,214,160,0.05)" />
+                        <rect x="18" y="18" width="14" height="14" rx="2" fill="#06d6a0" opacity="0.6" />
+                        <rect x="88" y="18" width="14" height="14" rx="2" fill="#06d6a0" opacity="0.6" />
+                        <rect x="18" y="88" width="14" height="14" rx="2" fill="#06d6a0" opacity="0.6" />
+                        <!-- Shield overlay -->
+                        <path d="M60 48 L75 56 V72 C75 80 68 87 60 90 C52 87 45 80 45 72 V56 Z" stroke="#06d6a0"
+                            stroke-width="2.5" fill="rgba(6,214,160,0.1)" />
+                        <path d="M55 70 L58 73 L67 64" stroke="#06d6a0" stroke-width="2.5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <!-- Scan lines -->
+                        <rect x="50" y="10" width="3" height="8" rx="1" fill="#06d6a0" opacity="0.3" />
+                        <rect x="50" y="102" width="3" height="8" rx="1" fill="#06d6a0" opacity="0.3" />
+                        <rect x="80" y="85" width="8" height="3" rx="1" fill="#06d6a0" opacity="0.3" />
+                    </svg>
+                </div>
+                <!-- Floating Alerts -->
+                <div class="floating-alert floating-alert--safe">
+                    ✅ Verified UPI ID
+                </div>
+                <div class="floating-alert floating-alert--danger">
+                    ⚠️ Phishing Domain Detected
+                </div>
+                <div class="floating-alert floating-alert--warn">
+                    🔍 Scanning...
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="how-it-works reveal" id="how-it-works">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-label">Methodology</div>
+            <h2 class="section-title">How It <span class="highlight">Works</span></h2>
+            <p class="section-subtitle">Our system follows a systematic approach to detect QR code fraud using
+                rule-based algorithms.</p>
+        </div>
+
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-icon">📱</div>
+                <h3>QR Code Input</h3>
+                <p>Upload a QR code image or paste the embedded data (UPI link / URL) directly into the scanner.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-icon">🔓</div>
+                <h3>Data Decoding</h3>
+                <p>The system decodes the QR code using Pyzbar and extracts UPI payment details, URLs, or plain text.
+                </p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-icon">🔎</div>
+                <h3>Rule Analysis</h3>
+                <p>20+ fraud detection rules analyze patterns like suspicious UPI IDs, misspelled brands, and untrusted
+                    domains.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-icon">🛡️</div>
+                <h3>Risk Classification</h3>
+                <p>A fraud score classifies the QR code as <strong class="highlight">Safe</strong>, <strong
+                        style="color:#ffd166">Suspicious</strong>, or <strong class="highlight-red">Scam Risk</strong>.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ SCAM TYPES ============ -->
+<section class="scam-types reveal" id="scam-types">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-label">Awareness</div>
+            <h2 class="section-title">Types of QR Code <span class="highlight-red">Scams</span></h2>
+            <p class="section-subtitle">Understanding common QR code fraud techniques helps you stay protected.</p>
+        </div>
+
+        <div class="scam-grid">
+            <div class="scam-card">
+                <div class="scam-card-icon">💳</div>
+                <h3>Fake Payment QR Codes</h3>
+                <p>Scammers place fake QR codes over legitimate ones at shops, parking meters, and restaurants,
+                    redirecting payments to their accounts.</p>
+                <span class="scam-tag">High Risk</span>
+            </div>
+            <div class="scam-card">
+                <div class="scam-card-icon">🎣</div>
+                <h3>Phishing URL QR Codes</h3>
+                <p>QR codes that redirect to fake websites mimicking banks or payment apps to steal login credentials
+                    and OTPs.</p>
+                <span class="scam-tag">High Risk</span>
+            </div>
+            <div class="scam-card">
+                <div class="scam-card-icon">🎁</div>
+                <h3>Lottery / Prize Scams</h3>
+                <p>QR codes promising cash prizes, lottery winnings, or rewards that require "small payments" to claim.
+                </p>
+                <span class="scam-tag">Medium Risk</span>
+            </div>
+            <div class="scam-card">
+                <div class="scam-card-icon">🔄</div>
+                <h3>Reverse Payment Scams</h3>
+                <p>Fraudsters send collect requests disguised as payment receipts, tricking users into approving money
+                    transfers.</p>
+                <span class="scam-tag">High Risk</span>
+            </div>
+            <div class="scam-card">
+                <div class="scam-card-icon">📧</div>
+                <h3>KYC Update Scams</h3>
+                <p>QR codes claiming to be from banks requiring KYC verification, leading to phishing sites that capture
+                    personal information.</p>
+                <span class="scam-tag">High Risk</span>
+            </div>
+            <div class="scam-card">
+                <div class="scam-card-icon">🏪</div>
+                <h3>Tampered Merchant QR</h3>
+                <p>Physical QR stickers at shops replaced with fraudulent ones. The original merchant's QR is covered
+                    with a scammer's QR code.</p>
+                <span class="scam-tag">High Risk</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ STATISTICS ============ -->
+<section class="statistics reveal" id="statistics">
+    <div class="container">
+        <div class="section-header" style="text-align:center;margin-bottom:48px;">
+            <div class="section-label">Impact</div>
+            <h2 class="section-title">Platform <span class="highlight">Statistics</span></h2>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon">🔍</div>
+                <div class="stat-number" data-target="{{ stats.total_scans }}">0</div>
+                <div class="stat-label">Total Scans</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🛡️</div>
+                <div class="stat-number" data-target="{{ stats.safe_scans }}">0</div>
+                <div class="stat-label">Safe QR Codes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-number" data-target="{{ stats.suspicious_detected }}">0</div>
+                <div class="stat-label">Suspicious Detected</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🚨</div>
+                <div class="stat-number" data-target="{{ stats.scams_detected }}">0</div>
+                <div class="stat-label">Scams Blocked</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ PREVENTION TIPS ============ -->
+<section class="prevention reveal" id="prevention">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-label">Safety Guide</div>
+            <h2 class="section-title">Prevention <span class="highlight">Tips</span></h2>
+            <p class="section-subtitle">Follow these best practices to protect yourself from QR code fraud.</p>
+        </div>
+
+        <div class="tips-grid">
+            <div class="tip-card">
+                <div class="tip-number">1</div>
+                <div class="tip-content">
+                    <h4>Verify Before Scanning</h4>
+                    <p>Always check if a QR code sticker has been tampered with or placed over another one. Look for
+                        signs of overlay or tampering.</p>
+                </div>
+            </div>
+            <div class="tip-card">
+                <div class="tip-number">2</div>
+                <div class="tip-content">
+                    <h4>Check the URL</h4>
+                    <p>After scanning, verify the URL or UPI ID before proceeding. Look for misspellings, suspicious
+                        domains, and non-HTTPS links.</p>
+                </div>
+            </div>
+            <div class="tip-card">
+                <div class="tip-number">3</div>
+                <div class="tip-content">
+                    <h4>Never Share OTP</h4>
+                    <p>No legitimate payment system will ask for your OTP through a QR code. If a page asks for OTP
+                        after scanning, it's a scam.</p>
+                </div>
+            </div>
+            <div class="tip-card">
+                <div class="tip-number">4</div>
+                <div class="tip-content">
+                    <h4>Use Trusted Apps</h4>
+                    <p>Only scan QR codes using official banking or payment apps. Avoid third-party QR scanner apps that
+                        may be malicious.</p>
+                </div>
+            </div>
+            <div class="tip-card">
+                <div class="tip-number">5</div>
+                <div class="tip-content">
+                    <h4>Verify Payment Direction</h4>
+                    <p>Ensure you are paying, not receiving a collect request. Scammers send collect requests disguised
+                        as payment confirmations.</p>
+                </div>
+            </div>
+            <div class="tip-card">
+                <div class="tip-number">6</div>
+                <div class="tip-content">
+                    <h4>Report Suspicious QR Codes</h4>
+                    <p>If you encounter a suspicious QR code, report it to Cyber Crime Helpline 1930 or use our platform
+                        to analyze and report.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ SYSTEM ARCHITECTURE ============ -->
+<section class="architecture reveal" id="architecture">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-label">Technical Design</div>
+            <h2 class="section-title">System <span class="highlight-purple">Architecture</span></h2>
+            <p class="section-subtitle">Overview of the rule-based fraud detection pipeline.</p>
+        </div>
+
+        <div class="arch-diagram">
+            <div class="arch-flow">
+                <div class="arch-node arch-node--input">
+                    <h4>📱 QR Input</h4>
+                    <p>Image Upload / Text</p>
+                </div>
+                <div class="arch-arrow">→</div>
+                <div class="arch-node arch-node--process">
+                    <h4>🔓 Decoder</h4>
+                    <p>Pyzbar + Pillow</p>
+                </div>
+                <div class="arch-arrow">→</div>
+                <div class="arch-node arch-node--rules">
+                    <h4>🔎 Rule Engine</h4>
+                    <p>20+ Detection Rules</p>
+                </div>
+                <div class="arch-arrow">→</div>
+                <div class="arch-node arch-node--output">
+                    <h4>📊 Scoring</h4>
+                    <p>Fraud Score (0-100)</p>
+                </div>
+                <div class="arch-arrow">→</div>
+                <div class="arch-node arch-node--alert">
+                    <h4>🚨 Alert</h4>
+                    <p>Safe / Suspicious / Scam</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section class="about reveal" id="about">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-content">
+                <div class="section-label">About The Project</div>
+                <h2 class="section-title">QR Code Scam <span class="highlight">Prevention System</span></h2>
+                <p class="about-text">
+                    This project was developed as part of a college assignment to address the growing problem of QR code
+                    fraud in India's digital payment ecosystem. With mobile payments becoming the norm, malicious QR
+                    codes have become a serious threat.
+                </p>
+                <p class="about-text">
+                    Our system uses <strong>rule-based fraud detection algorithms</strong> — not AI — to analyze QR code
+                    contents and identify potential scams. It checks UPI payment details, URLs, and patterns against a
+                    database of known threats.
+                </p>
+                <div class="tech-stack">
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">Flask</span>
+                    <span class="tech-tag">SQLAlchemy</span>
+                    <span class="tech-tag">SQLite / MySQL</span>
+                    <span class="tech-tag">Pyzbar</span>
+                    <span class="tech-tag">Pillow</span>
+                    <span class="tech-tag">HTML / CSS / JS</span>
+                </div>
+            </div>
+            <div class="about-visual">
+                <div class="about-card">
+                    <div class="about-card-icon">🔍</div>
+                    <h4>Pattern Analysis</h4>
+                    <p>Detects suspicious UPI IDs, domains, and text patterns</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">📊</div>
+                    <h4>Fraud Scoring</h4>
+                    <p>Quantitative risk assessment with 0-100 scoring</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">🗄️</div>
+                    <h4>Database Verification</h4>
+                    <p>Blacklist & whitelist pattern matching</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">📋</div>
+                    <h4>Scan History</h4>
+                    <p>Complete logging of all scans & reports</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

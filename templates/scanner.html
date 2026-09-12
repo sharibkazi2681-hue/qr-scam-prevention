@@ -1,0 +1,1281 @@
+{% extends "base.html" %}
+
+{% block title %}QR Scanner - QR Scam Prevention{% endblock %}
+
+{% block content %}
+
+<div class="scanner-page">
+
+    <div class="scanner-header">
+        <h1>🔍 QR Code Scanner</h1>
+        <p>Scan QR codes to check whether they are Safe, Suspicious or Scam.</p>
+    </div>
+
+    <!-- TABS -->
+    <div class="scanner-tabs">
+
+        <button class="tab-btn active"
+                onclick="showTab('uploadTab', this)">
+            🖼️ Upload Image
+        </button>
+
+        <button class="tab-btn"
+                onclick="showTab('cameraTab', this)">
+            📷 Scan with Camera
+        </button>
+
+        <button class="tab-btn"
+                onclick="showTab('textTab', this)">
+            📝 Paste Data
+        </button>
+
+    </div>
+
+
+    <!-- ================= UPLOAD ================= -->
+
+    <div id="uploadTab" class="tab-content active">
+
+        <div class="card">
+
+            <h2>🖼️ Upload QR Code Image</h2>
+
+            <p>Select an image containing a QR code.</p>
+
+            <input
+                type="file"
+                id="qrImage"
+                accept="image/*"
+                onchange="uploadQR()"
+            >
+
+            <div id="uploadStatus"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= CAMERA ================= -->
+
+    <div id="cameraTab" class="tab-content">
+
+        <div class="card camera-card">
+
+            <h2>📷 Scan QR using Camera</h2>
+
+            <p>
+                Allow camera access and place the QR code inside the blue box.
+            </p>
+
+
+            <!-- LIVE CAMERA -->
+
+            <div class="camera-wrapper">
+
+                <video
+                    id="cameraVideo"
+                    autoplay
+                    muted
+                    playsinline
+                ></video>
+
+                <div class="scan-frame"></div>
+
+            </div>
+
+
+            <!-- Hidden canvas for QR detection -->
+
+            <canvas
+                id="cameraCanvas"
+                style="display:none;">
+            </canvas>
+
+
+            <!-- CAMERA STATUS -->
+
+            <div
+                id="cameraStatus"
+                class="camera-status">
+                Camera is not started.
+            </div>
+
+
+            <!-- BUTTONS -->
+
+            <div class="camera-buttons">
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    onclick="startCamera()">
+                    📷 Start Camera
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-success"
+                    onclick="manualScan()">
+                    🔍 Scan QR
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    onclick="stopCamera()">
+                    ⏹ Stop Camera
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= PASTE DATA ================= -->
+
+    <div id="textTab" class="tab-content">
+
+        <div class="card">
+
+            <h2>📝 Paste QR Data</h2>
+
+            <p>Paste the QR code URL, UPI link or text below.</p>
+
+            <textarea
+                id="qrText"
+                rows="6"
+                placeholder="Paste QR data here...">
+            </textarea>
+
+            <br>
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                onclick="scanText()">
+                🔍 Analyze QR
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= RESULT ================= -->
+
+    <div
+        id="resultSection"
+        style="display:none;">
+
+        <div class="card result-card">
+
+            <h2>🔎 Scan Result</h2>
+
+            <div id="resultContent"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= ERROR ================= -->
+
+    <div
+        id="errorMessage"
+        class="error-message"
+        style="display:none;">
+    </div>
+
+</div>
+
+
+<style>
+
+/* ================= PAGE ================= */
+
+.scanner-page {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+.scanner-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.scanner-header h1 {
+    margin-bottom: 8px;
+}
+
+
+/* ================= TABS ================= */
+
+.scanner-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #e9ecef;
+    font-size: 15px;
+}
+
+.tab-btn.active {
+    background: #0d6efd;
+    color: white;
+}
+
+
+/* ================= TAB CONTENT ================= */
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+
+/* ================= CARD ================= */
+
+.card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+
+/* ================= CAMERA ================= */
+
+.camera-card {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.camera-wrapper {
+    position: relative;
+
+    width: 100%;
+    max-width: 700px;
+    height: 450px;
+
+    margin: 25px auto;
+
+    background: #000;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+    border: 3px solid #333;
+}
+
+
+/* LIVE VIDEO */
+
+#cameraVideo {
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    background: #000;
+
+    visibility: visible;
+    opacity: 1;
+}
+
+
+/* BLUE QR FRAME */
+
+.scan-frame {
+
+    position: absolute;
+
+    width: 260px;
+    height: 260px;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    border: 3px solid #00aaff;
+
+    border-radius: 12px;
+
+    pointer-events: none;
+
+    box-sizing: border-box;
+
+}
+
+
+/* CAMERA STATUS */
+
+.camera-status {
+
+    margin: 15px auto;
+
+    max-width: 700px;
+
+    padding: 12px;
+
+    border-radius: 8px;
+
+    background: #f1f3f5;
+
+}
+
+
+/* CAMERA BUTTONS */
+
+.camera-buttons {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+
+}
+
+
+/* ================= BUTTONS ================= */
+
+.btn {
+
+    border: none;
+
+    border-radius: 8px;
+
+    padding: 11px 18px;
+
+    cursor: pointer;
+
+    font-size: 15px;
+}
+
+.btn-primary {
+    background: #0d6efd;
+    color: white;
+}
+
+.btn-success {
+    background: #198754;
+    color: white;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+
+/* ================= TEXTAREA ================= */
+
+textarea {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 12px;
+
+    margin: 15px 0;
+
+    border: 1px solid #ccc;
+
+    border-radius: 8px;
+
+    resize: vertical;
+
+}
+
+
+/* ================= RESULT ================= */
+
+.result-card {
+
+    margin-top: 30px;
+
+    text-align: left;
+
+}
+
+
+/* ================= ERROR ================= */
+
+.error-message {
+
+    margin-top: 20px;
+
+    padding: 15px;
+
+    background: #f8d7da;
+
+    color: #842029;
+
+    border-radius: 8px;
+
+}
+
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 600px) {
+
+    .camera-wrapper {
+        height: 350px;
+    }
+
+    .scan-frame {
+        width: 220px;
+        height: 220px;
+    }
+
+}
+
+</style>
+
+
+<!-- ================= jsQR ================= -->
+
+<script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
+
+
+<script>
+
+let cameraStream = null;
+let scanning = false;
+
+
+/* =====================================================
+   TAB SYSTEM
+===================================================== */
+
+function showTab(tabId, button) {
+
+    document.querySelectorAll(".tab-content").forEach(function(tab) {
+        tab.classList.remove("active");
+    });
+
+    document.querySelectorAll(".tab-btn").forEach(function(btn) {
+        btn.classList.remove("active");
+    });
+
+    document.getElementById(tabId).classList.add("active");
+
+    button.classList.add("active");
+
+    if (tabId !== "cameraTab") {
+        stopCamera();
+    }
+}
+
+
+/* =====================================================
+   START CAMERA
+===================================================== */
+
+async function startCamera() {
+
+    const video =
+        document.getElementById("cameraVideo");
+
+    const status =
+        document.getElementById("cameraStatus");
+
+
+    try {
+
+        status.innerText =
+            "⏳ Starting camera...";
+
+
+        /* Stop previous camera */
+
+        if (cameraStream) {
+
+            cameraStream.getTracks().forEach(function(track) {
+                track.stop();
+            });
+
+            cameraStream = null;
+        }
+
+
+        /* Check browser support */
+
+        if (
+            !navigator.mediaDevices ||
+            !navigator.mediaDevices.getUserMedia
+        ) {
+
+            status.innerText =
+                "❌ Camera is not supported by this browser.";
+
+            return;
+        }
+
+
+        /* Request camera */
+
+        cameraStream =
+            await navigator.mediaDevices.getUserMedia({
+
+                video: {
+                    facingMode: {
+                        ideal: "environment"
+                    },
+
+                    width: {
+                        ideal: 1280
+                    },
+
+                    height: {
+                        ideal: 720
+                    }
+                },
+
+                audio: false
+            });
+
+
+        /* IMPORTANT */
+
+        video.srcObject = cameraStream;
+
+        video.muted = true;
+
+        video.autoplay = true;
+
+        video.playsInline = true;
+
+        video.style.display = "block";
+
+        video.style.visibility = "visible";
+
+        video.style.opacity = "1";
+
+
+        /* Wait for video */
+
+        video.onloadedmetadata = async function() {
+
+            try {
+
+                await video.play();
+
+
+                status.innerText =
+                    "🟢 Camera ON — QR code ko blue box ke andar rakho.";
+
+
+                scanning = true;
+
+                requestAnimationFrame(
+                    scanCameraFrame
+                );
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                status.innerText =
+                    "❌ Camera video play nahi ho raha.";
+            }
+
+        };
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        status.innerText =
+            "❌ Camera start nahi hua: " +
+            error.message;
+
+    }
+
+}
+
+
+/* =====================================================
+   SCAN CAMERA FRAME
+===================================================== */
+
+function scanCameraFrame() {
+
+    if (!scanning) {
+        return;
+    }
+
+
+    const video =
+        document.getElementById("cameraVideo");
+
+    const canvas =
+        document.getElementById("cameraCanvas");
+
+
+    if (
+        video.readyState >= 2 &&
+        video.videoWidth > 0 &&
+        video.videoHeight > 0
+    ) {
+
+
+        canvas.width =
+            video.videoWidth;
+
+        canvas.height =
+            video.videoHeight;
+
+
+        const context =
+            canvas.getContext(
+                "2d",
+                {
+                    willReadFrequently: true
+                }
+            );
+
+
+        context.drawImage(
+
+            video,
+
+            0,
+            0,
+
+            canvas.width,
+            canvas.height
+
+        );
+
+
+        /* Check jsQR */
+
+        if (
+            typeof jsQR !== "undefined"
+        ) {
+
+
+            const imageData =
+                context.getImageData(
+
+                    0,
+                    0,
+
+                    canvas.width,
+                    canvas.height
+
+                );
+
+
+            const qr =
+                jsQR(
+
+                    imageData.data,
+
+                    imageData.width,
+
+                    imageData.height,
+
+                    {
+                        inversionAttempts:
+                            "attemptBoth"
+                    }
+
+                );
+
+
+            /* QR FOUND */
+
+            if (qr) {
+
+                scanning = false;
+
+
+                document
+                    .getElementById(
+                        "cameraStatus"
+                    )
+                    .innerText =
+                    "✅ QR detected! Analyzing...";
+
+
+                analyzeCameraQR(
+                    qr.data
+                );
+
+
+                return;
+            }
+
+        }
+
+    }
+
+
+    requestAnimationFrame(
+        scanCameraFrame
+    );
+
+}
+
+
+/* =====================================================
+   MANUAL SCAN
+===================================================== */
+
+function manualScan() {
+
+    if (!cameraStream) {
+
+        document
+            .getElementById(
+                "cameraStatus"
+            )
+            .innerText =
+            "❌ Pehle Start Camera dabao.";
+
+        return;
+    }
+
+
+    scanning = true;
+
+
+    document
+        .getElementById(
+            "cameraStatus"
+        )
+        .innerText =
+        "🔍 QR code search kar raha hai...";
+
+
+    requestAnimationFrame(
+        scanCameraFrame
+    );
+
+}
+
+
+/* =====================================================
+   ANALYZE CAMERA QR
+===================================================== */
+
+async function analyzeCameraQR(qrText) {
+
+    try {
+
+
+        const response =
+            await fetch(
+                "/api/scan/text",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        qr_text: qrText
+                    })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "QR analysis failed."
+            );
+
+        }
+
+
+        /* Stop camera after successful scan */
+
+        stopCamera();
+
+
+        /* Show result */
+
+        showResult(data);
+
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        document
+            .getElementById(
+                "cameraStatus"
+            )
+            .innerText =
+            "❌ " + error.message;
+
+
+        scanning = true;
+
+
+        requestAnimationFrame(
+            scanCameraFrame
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   STOP CAMERA
+===================================================== */
+
+function stopCamera() {
+
+    scanning = false;
+
+
+    if (cameraStream) {
+
+        cameraStream
+            .getTracks()
+            .forEach(function(track) {
+
+                track.stop();
+
+            });
+
+
+        cameraStream = null;
+    }
+
+
+    const video =
+        document.getElementById(
+            "cameraVideo"
+        );
+
+
+    if (video) {
+
+        video.pause();
+
+        video.srcObject = null;
+
+    }
+
+}
+
+
+/* =====================================================
+   TEXT SCAN
+===================================================== */
+
+async function scanText() {
+
+    const text =
+        document
+            .getElementById(
+                "qrText"
+            )
+            .value
+            .trim();
+
+
+    if (!text) {
+
+        showError(
+            "Please enter QR data."
+        );
+
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/scan/text",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        qr_text: text
+                    })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "Scan failed."
+            );
+
+        }
+
+
+        showResult(data);
+
+
+    } catch (error) {
+
+        showError(
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   IMAGE UPLOAD
+===================================================== */
+
+async function uploadQR() {
+
+    const input =
+        document.getElementById(
+            "qrImage"
+        );
+
+
+    if (!input.files.length) {
+        return;
+    }
+
+
+    const formData =
+        new FormData();
+
+
+    formData.append(
+        "qr_image",
+        input.files[0]
+    );
+
+
+    document
+        .getElementById(
+            "uploadStatus"
+        )
+        .innerText =
+        "⏳ Scanning image...";
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                "/api/scan/upload",
+                {
+
+                    method: "POST",
+
+                    body: formData
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "Upload scan failed."
+            );
+
+        }
+
+
+        document
+            .getElementById(
+                "uploadStatus"
+            )
+            .innerText =
+            "✅ Scan completed.";
+
+
+        showResult(data);
+
+
+    } catch (error) {
+
+        document
+            .getElementById(
+                "uploadStatus"
+            )
+            .innerText =
+            "❌ " + error.message;
+
+    }
+
+}
+
+
+/* =====================================================
+   SHOW RESULT
+===================================================== */
+
+function showResult(data) {
+
+    const section =
+        document.getElementById(
+            "resultSection"
+        );
+
+
+    const content =
+        document.getElementById(
+            "resultContent"
+        );
+
+
+    const analysis =
+        data.analysis || {};
+
+
+    const risk =
+        analysis.risk_level ||
+        analysis.risk ||
+        analysis.status ||
+        "Unknown";
+
+
+    const qrData =
+        data.qr_data ||
+        data.qr_text ||
+        data.data ||
+        "No QR data available";
+
+
+    const type =
+        data.data_type ||
+        "Unknown";
+
+
+    let html = `
+
+        <h3>
+            Result:
+            ${escapeHtml(String(risk))}
+        </h3>
+
+        <p>
+            <strong>Data Type:</strong>
+            ${escapeHtml(String(type))}
+        </p>
+
+        <p>
+            <strong>QR Data:</strong>
+        </p>
+
+        <div style="
+            background:#f5f5f5;
+            padding:12px;
+            border-radius:8px;
+            word-break:break-all;
+        ">
+            ${escapeHtml(String(qrData))}
+        </div>
+
+    `;
+
+
+    if (analysis.message) {
+
+        html += `
+
+            <p>
+                <strong>Analysis:</strong>
+                ${escapeHtml(
+                    String(analysis.message)
+                )}
+            </p>
+
+        `;
+
+    }
+
+
+    if (
+        analysis.rules_triggered &&
+        Array.isArray(
+            analysis.rules_triggered
+        )
+    ) {
+
+
+        html += `
+
+            <h4>
+                Rules Triggered
+            </h4>
+
+            <ul>
+
+        `;
+
+
+        analysis.rules_triggered
+            .forEach(function(rule) {
+
+                html += `
+
+                    <li>
+                        ${escapeHtml(
+                            String(rule)
+                        )}
+                    </li>
+
+                `;
+
+            });
+
+
+        html += `
+            </ul>
+        `;
+
+    }
+
+
+    html += `</div>`;
+
+
+    content.innerHTML = html;
+
+
+    section.style.display =
+        "block";
+
+
+    section.scrollIntoView({
+        behavior: "smooth"
+    });
+
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+function showError(message) {
+
+    const error =
+        document.getElementById(
+            "errorMessage"
+        );
+
+
+    error.innerText =
+        "❌ " + message;
+
+
+    error.style.display =
+        "block";
+
+
+    setTimeout(function() {
+
+        error.style.display =
+            "none";
+
+    }, 5000);
+
+}
+
+
+/* =====================================================
+   HTML ESCAPE
+===================================================== */
+
+function escapeHtml(text) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        text;
+
+
+    return div.innerHTML;
+
+}
+
+
+/* =====================================================
+   CLEANUP
+===================================================== */
+
+window.addEventListener(
+    "beforeunload",
+    function() {
+
+        stopCamera();
+
+    }
+);
+
+</script>
+
+{% endblock %}

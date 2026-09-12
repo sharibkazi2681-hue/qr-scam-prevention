@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="QR Code Scam Prevention System - Detect and prevent QR-based payment fraud using rule-based detection algorithms.">
+    <title>{% block title %}QR Shield - Scam Prevention System{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow--cyan"></div>
+    <div class="bg-glow bg-glow--purple"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="{{ url_for('index') }}" class="nav-logo">
+                <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="12" height="12" rx="2" stroke="#06d6a0" stroke-width="2"/>
+                    <rect x="18" y="2" width="12" height="12" rx="2" stroke="#06d6a0" stroke-width="2"/>
+                    <rect x="2" y="18" width="12" height="12" rx="2" stroke="#06d6a0" stroke-width="2"/>
+                    <rect x="20" y="20" width="8" height="8" rx="1" fill="#06d6a0"/>
+                    <circle cx="8" cy="8" r="2" fill="#06d6a0"/>
+                    <circle cx="24" cy="8" r="2" fill="#06d6a0"/>
+                    <circle cx="8" cy="24" r="2" fill="#06d6a0"/>
+                </svg>
+                QR Shield
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('scanner') }}">Scanner</a></li>
+                <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('history') }}">History</a></li>
+                <li><a href="{{ url_for('scanner') }}" class="nav-cta">Scan Now</a></li>
+            </ul>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-messages" style="position:fixed;top:80px;right:24px;z-index:9999;">
+        {% for category, message in messages %}
+        <div class="flash-msg flash-{{ category }}" style="padding:14px 24px;margin-bottom:8px;border-radius:8px;background:rgba(17,24,39,0.95);border:1px solid var(--border-subtle);color:var(--text-primary);font-size:0.9rem;backdrop-filter:blur(20px);">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="{{ url_for('index') }}" class="nav-logo">
+                        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="2" y="2" width="12" height="12" rx="2" stroke="#06d6a0" stroke-width="2"/>
+                            <rect x="18" y="2" width="12" height="12" rx="2" stroke="#06d6a0" stroke-width="2"/>
+                            <rect x="2" y="18" width="12" height="12" rx="2" stroke="#06d6a0" stroke-width="2"/>
+                            <rect x="20" y="20" width="8" height="8" rx="1" fill="#06d6a0"/>
+                            <circle cx="8" cy="8" r="2" fill="#06d6a0"/>
+                            <circle cx="24" cy="8" r="2" fill="#06d6a0"/>
+                            <circle cx="8" cy="24" r="2" fill="#06d6a0"/>
+                        </svg>
+                        QR Shield
+                    </a>
+                    <p>Protecting users from QR code fraud with intelligent rule-based detection. A college project demonstrating practical cybersecurity techniques.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="{{ url_for('index') }}">Home</a></li>
+                        <li><a href="{{ url_for('scanner') }}">Scanner</a></li>
+                        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                        <li><a href="{{ url_for('history') }}">History</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="https://www.npci.org.in/" target="_blank">NPCI</a></li>
+                        <li><a href="https://www.rbi.org.in/" target="_blank">RBI</a></li>
+                        <li><a href="https://cybercrime.gov.in/" target="_blank">Cyber Crime Portal</a></li>
+                        <li><a href="#">Report Scam</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Technologies</h4>
+                    <ul>
+                        <li><a href="https://www.python.org/" target="_blank">Python</a></li>
+                        <li><a href="https://flask.palletsprojects.com/" target="_blank">Flask</a></li>
+                        <li><a href="https://www.sqlalchemy.org/" target="_blank">SQLAlchemy</a></li>
+                        <li><a href="#">Pyzbar & Pillow</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 QR Shield — College Project. All rights reserved.</p>
+                <p>Built with Python, Flask & SQLAlchemy</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Main JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

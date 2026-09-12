@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Scan History — QR Shield{% endblock %}
+
+{% block content %}
+<section style="padding-top:120px;padding-bottom:80px;position:relative;z-index:1;">
+    <div class="container">
+        <div class="section-header" style="margin-bottom:48px;">
+            <div class="section-label">Records</div>
+            <h2 class="section-title">Scan <span class="highlight">History</span></h2>
+            <p class="section-subtitle">Complete log of all QR code scans and fraud detection results.</p>
+        </div>
+
+        {% if scans.items %}
+        <div
+            style="background:var(--bg-glass);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);overflow:hidden;">
+            <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:rgba(255,255,255,0.02);">
+                            <th
+                                style="padding:14px 16px;text-align:left;font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">
+                                ID</th>
+                            <th
+                                style="padding:14px 16px;text-align:left;font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">
+                                Date & Time</th>
+                            <th
+                                style="padding:14px 16px;text-align:left;font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">
+                                Type</th>
+                            <th
+                                style="padding:14px 16px;text-align:left;font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">
+                                QR Data</th>
+                            <th
+                                style="padding:14px 16px;text-align:left;font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">
+                                Fraud Score</th>
+                            <th
+                                style="padding:14px 16px;text-align:left;font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">
+                                Risk Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for scan in scans.items %}
+                        <tr style="border-bottom:1px solid var(--border-subtle);transition:background 0.2s;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.02)'"
+                            onmouseout="this.style.background=''">
+                            <td
+                                style="padding:14px 16px;font-size:0.85rem;font-family:var(--font-mono);color:var(--text-muted);">
+                                #{{ scan.id }}</td>
+                            <td style="padding:14px 16px;font-size:0.85rem;color:var(--text-secondary);">{{
+                                scan.scan_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td style="padding:14px 16px;">
+                                <span
+                                    style="padding:3px 10px;border-radius:100px;font-size:0.75rem;font-weight:600;background:rgba(17,138,178,0.1);color:var(--accent-blue);text-transform:uppercase;">{{
+                                    scan.data_type }}</span>
+                            </td>
+                            <td style="padding:14px 16px;font-size:0.82rem;font-family:var(--font-mono);color:var(--text-secondary);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                                title="{{ scan.qr_data }}">{{ scan.qr_data[:70] }}{% if scan.qr_data|length > 70 %}...{%
+                                endif %}</td>
+                            <td style="padding:14px 16px;">
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <div
+                                        style="flex:1;max-width:80px;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;">
+                                        <div style="height:100%;border-radius:3px;width:{{ scan.fraud_score }}%;
+                                            {% if scan.risk_level == 'safe' %}background:var(--accent-cyan);
+                                            {% elif scan.risk_level == 'suspicious' %}background:var(--accent-yellow);
+                                            {% else %}background:var(--accent-red);{% endif %}
+                                        "></div>
+                                    </div>
+                                    <span style="font-size:0.85rem;font-weight:700;
+                                        {% if scan.risk_level == 'safe' %}color:var(--accent-cyan);
+                                        {% elif scan.risk_level == 'suspicious' %}color:var(--accent-yellow);
+                                        {% else %}color:var(--accent-red);{% endif %}
+                                    ">{{ scan.fraud_score }}</span>
+                                </div>
+                            </td>
+                            <td style="padding:14px 16px;">
+                                {% if scan.risk_level == 'safe' %}
+                                <span
+                                    style="padding:4px 12px;border-radius:100px;font-size:0.75rem;font-weight:600;background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.2);color:var(--accent-cyan);">✅
+                                    Safe</span>
+                                {% elif scan.risk_level == 'suspicious' %}
+                                <span
+                                    style="padding:4px 12px;border-radius:100px;font-size:0.75rem;font-weight:600;background:rgba(255,209,102,0.1);border:1px solid rgba(255,209,102,0.2);color:var(--accent-yellow);">⚠️
+                                    Suspicious</span>
+                                {% else %}
+                                <span
+                                    style="padding:4px 12px;border-radius:100px;font-size:0.75rem;font-weight:600;background:rgba(239,71,111,0.1);border:1px solid rgba(239,71,111,0.2);color:var(--accent-red);">🚨
+                                    Scam</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if scans.pages > 1 %}
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:20px;">
+                {% if scans.has_prev %}
+                <a href="{{ url_for('history', page=scans.prev_num) }}"
+                    style="padding:8px 16px;border-radius:6px;border:1px solid var(--border-subtle);font-size:0.85rem;color:var(--text-secondary);">←
+                    Prev</a>
+                {% endif %}
+
+                {% for page_num in scans.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                {% if page_num == scans.page %}
+                <span
+                    style="padding:8px 14px;border-radius:6px;background:var(--accent-cyan);color:var(--bg-primary);font-size:0.85rem;font-weight:600;">{{
+                    page_num }}</span>
+                {% else %}
+                <a href="{{ url_for('history', page=page_num) }}"
+                    style="padding:8px 14px;border-radius:6px;border:1px solid var(--border-subtle);font-size:0.85rem;color:var(--text-secondary);">{{
+                    page_num }}</a>
+                {% endif %}
+                {% else %}
+                <span style="color:var(--text-muted);">…</span>
+                {% endif %}
+                {% endfor %}
+
+                {% if scans.has_next %}
+                <a href="{{ url_for('history', page=scans.next_num) }}"
+                    style="padding:8px 16px;border-radius:6px;border:1px solid var(--border-subtle);font-size:0.85rem;color:var(--text-secondary);">Next
+                    →</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        {% else %}
+        <div
+            style="text-align:center;padding:100px 24px;background:var(--bg-glass);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);">
+            <p style="font-size:3rem;margin-bottom:16px;">📋</p>
+            <h3 style="font-size:1.3rem;font-weight:700;margin-bottom:8px;">No Scan History</h3>
+            <p style="color:var(--text-secondary);margin-bottom:24px;">Start scanning QR codes to build your history.
+            </p>
+            <a href="{{ url_for('scanner') }}" class="btn btn-primary">🔍 Scan QR Code</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
